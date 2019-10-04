@@ -9,6 +9,8 @@ import (
 	qri "github.com/qri-io/jsonschema"
 	santhosh "github.com/santhosh-tekuri/jsonschema"
 	xeipuuv "github.com/xeipuuv/gojsonschema"
+	xeipuuvFork "github.com/aadij/gojsonschema"
+
 )
 
 type Data struct {
@@ -113,6 +115,28 @@ func BenchmarkXeipuu(b *testing.B) {
 			for _, test := range s.Tests {
 				documentLoader := xeipuuv.NewGoLoader(test.Data)
 				result, err := xeipuuv.Validate(schemaLoader, documentLoader)
+				if err != nil {
+					b.Fatal(err.Error())
+				}
+				if result.Valid() != test.Valid {
+					b.Log(msg)
+				}
+			}
+		}
+	}
+}
+
+
+func BenchmarkXeipuuFork(b *testing.B) {
+	if initErr != nil {
+		b.Fatal(initErr.Error())
+	}
+	for i := 0; i < b.N; i++ {
+		for _, s := range schemas {
+			schemaLoader :=  xeipuuvFork.NewGoLoader(s.Schema)
+			for _, test := range s.Tests {
+				documentLoader := xeipuuvFork.NewGoLoader(test.Data)
+				result, err :=  xeipuuvFork.Validate(schemaLoader, documentLoader)
 				if err != nil {
 					b.Fatal(err.Error())
 				}
